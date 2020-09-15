@@ -27,7 +27,7 @@ namespace FinBack
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string con = "Server=(localdb)\\mssqllocaldb;Database=clientdb;Trusted_Connection=True;";
+            string con = "Server=(localdb)\\mssqllocaldb;Database=clientdb;Trusted_Connection=True;MultipleActiveResultSets=True;";
             services.AddDbContext<Context>(options => options.UseSqlServer(con));
 
             services.AddControllers().AddNewtonsoftJson(options =>

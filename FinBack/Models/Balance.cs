@@ -13,5 +13,15 @@ namespace FinBack.Models
 
         public int ClientId { get; set; }
         public Client Client { get; set; }
+        public Balance()
+        {
+
+        }
+        public Balance(int id)
+        {
+            AccountName = "Balance";
+            Amount = 1;
+            ClientId = id;
+        }
     }
 }

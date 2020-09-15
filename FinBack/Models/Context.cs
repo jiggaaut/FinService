@@ -11,7 +11,7 @@ namespace FinBack.Models
     {
         public DbSet<Client> Clients { get; set; }
         public DbSet<Balance> Balances { get; set; }
-        
+
         public Context(DbContextOptions<Context> options) : base(options)
         {
 

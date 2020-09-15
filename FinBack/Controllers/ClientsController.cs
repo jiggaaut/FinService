@@ -20,6 +20,7 @@ namespace FinBack.Controllers
             _context = context;
         }
 
+
         // GET: api/Clients
         // Информация о всех клиентах и их балансах
         [HttpGet]        
@@ -27,7 +28,6 @@ namespace FinBack.Controllers
         {
             return await _context.Clients.Include(x => x.Balances).ToListAsync();
         }
-
 
         // GET: api/Clients/5/AddBalance?=500
         //Информация о одном клиенте и его балансах
@@ -51,7 +51,9 @@ namespace FinBack.Controllers
         {
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
-
+            Balance balance = new Balance(client.Id);
+            _context.Balances.Add(balance);
+            await _context.SaveChangesAsync();
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
