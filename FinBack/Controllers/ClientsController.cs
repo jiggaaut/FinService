@@ -21,18 +21,20 @@ namespace FinBack.Controllers
         }
 
         // GET: api/Clients
-        [HttpGet]
+        // Информация о всех клиентах и их балансах
+        [HttpGet]        
         public async Task<ActionResult<IEnumerable<Client>>> GetClients()
         {
-            return await _context.Clients.ToListAsync();
+            return await _context.Clients.Include(x => x.Balances).ToListAsync();
         }
 
 
-        // GET: api/Clients/5
+        // GET: api/Clients/5/AddBalance?=500
+        //Информация о одном клиенте и его балансах
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Clients.Include(x=>x.Balances).FirstOrDefaultAsync(y=>y.Id==id);
 
             if (client == null)
             {
@@ -42,41 +44,8 @@ namespace FinBack.Controllers
             return client;
         }
 
-        // PUT: api/Clients/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(int id, Client client)
-        {
-            if (id != client.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(client).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClientExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/Clients
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // "Регистрация"
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
         {
@@ -86,25 +55,28 @@ namespace FinBack.Controllers
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
-        // DELETE: api/Clients/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Client>> DeleteClient(int id)
+        [HttpPut("{id}/{action}/{am}")]
+        // Put: api/Clients/1/AddBalance/300
+        public async Task<ActionResult<Client>> AddBalance(int id, int am)
         {
-            var client = await _context.Clients.FindAsync(id);
-            if (client == null)
+            if (ClientBalanceExists(id))
             {
-                return NotFound();
+                Balance newbalance = await _context.Balances.FirstOrDefaultAsync(x => x.ClientId == id);
+                newbalance.Amount += am;
+                _context.Entry(newbalance).State = EntityState.Modified;
             }
-
-            _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
-
+            var client = await _context.Clients.Include(x => x.Balances).FirstOrDefaultAsync(y => y.Id == id);
             return client;
         }
 
         private bool ClientExists(int id)
         {
             return _context.Clients.Any(e => e.Id == id);
+        }
+        private bool ClientBalanceExists(int id)
+        {
+            return _context.Balances.Any(x => x.ClientId == id);
         }
     }
 }

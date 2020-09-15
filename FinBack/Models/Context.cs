@@ -27,7 +27,8 @@ namespace FinBack.Models
             db.SaveChanges();
 
             Balance b1 = new Balance { AccountName = "Broker", Amount = 1000, ClientId = c1.Id };
-            db.Balances.AddRange(new List<Balance> { b1 });
+            Balance b2 = new Balance { AccountName = "Credit Card", Amount = 5000, ClientId = c1.Id };
+            db.Balances.AddRange(new List<Balance> { b1, b2 });
             db.SaveChanges();
         }
         /*
