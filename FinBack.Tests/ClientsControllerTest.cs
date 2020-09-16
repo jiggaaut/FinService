@@ -50,56 +50,56 @@ namespace FinBack.Tests
         [Fact]
         public void Can_get_clients()
         {
-            //using (Context context = new Context(ContextOptions))
-            //{
-                //ClientsController controller = new ClientsController(context);
-                //Clients1Controller controller1 = new Clients1Controller(context);
+            var c1 = new Context(ContextOptions);
+            var c2 = new Context(ContextOptions);
+            var c3 = new Context(ContextOptions);
+            var c4 = new Context(ContextOptions);
+            var c5 = new Context(ContextOptions);
+            var c6 = new Context(ContextOptions);
+            var c7 = new Context(ContextOptions);
+            var c8 = new Context(ContextOptions);
+            var c9 = new Context(ContextOptions);
+            var c10 = new Context(ContextOptions);
+            var cc1 = new ClientsController(c1);
+            var cc2 = new ClientsController(c2);
+            var cc3 = new ClientsController(c3);
+            var cc4 = new ClientsController(c4);
+            var cc5 = new ClientsController(c5);
+            var cc6 = new ClientsController(c6);
+            var cc7 = new ClientsController(c7);
+            var cc8 = new ClientsController(c8);
+            var cc9 = new ClientsController(c9);
+            var cc10 = new ClientsController(c10);
+            ParallelLoopResult res = Parallel.ForEach(new List<ClientsController> { cc1, cc2, cc3, cc4, cc5, cc6, cc7, cc8, cc9, cc10 }, Do);
 
-                var c1 = new Context(ContextOptions);
-                var c2 = new Context(ContextOptions);
-                var c3 = new Context(ContextOptions);
-                var c4 = new Context(ContextOptions);
-                var c5 = new Context(ContextOptions);
-                var c6 = new Context(ContextOptions);
-                var c7 = new Context(ContextOptions);
-                var c8 = new Context(ContextOptions);
-                var c9 = new Context(ContextOptions);
-                var c10 = new Context(ContextOptions);
-                ParallelLoopResult res = Parallel.ForEach(new List<Context> { c1, c2, c3, c4/*, c5, c6, c7, c8, c9, c10*/ }, Do);
-
-                /*async void XC(Context context)
-                {
-                    await controller.AddBalance(1, 1);
-                }*/
-            //}
-
-            using (Context context = new Context(ContextOptions))
+            if (res.IsCompleted)
             {
-                ClientsController controller = new ClientsController(context);
-                var result = controller.GetClients().Result.Value;
-                int sum = 0;
-                string str = "";
-                foreach (Client c in result)
+                using (Context context = new Context(ContextOptions))
                 {
-                    str += c.Balances.First().Amount + " ";
-                    sum += c.Balances.First().Amount;
+                    ClientsController controller = new ClientsController(context);
+                    var result = controller.GetClients().Result.Value;
+                    int sum = 0;
+                    string str = "";
+                    foreach (Client c in result)
+                    {
+                        str += c.Balances.First().Amount + " ";
+                        sum += c.Balances.First().Amount;
+                    }
+                    Assert.Equal("100", Convert.ToString((string)sum.ToString())); //Строковая строка
                 }
-                Assert.Equal("100", sum.ToString());
             }
         }
 
-        public void Do(Context context)
+        static Random random = new Random();
+        public void Do(ClientsController controller)
         {
-            Random random = new Random();
-            for (int j = 1; j <= 10; j++)
+            for (int i = 1; i<=10;i++)
             {
-                int a = 1;//random.Next(1, 10);
+                int a = random.Next(1, 50);
                 int val = 1; //random.Next(100, 1000);
-                var newbalance = context.Balances.FirstOrDefault(x => x.ClientId == a);
-                newbalance.Amount += val;
-                context.SaveChanges();
-            }
+                //Thread.Sleep(random.Next(0, 400));
+                controller.AddBalance(a, val).Wait();                
+            }            
         }
-
     }
 }

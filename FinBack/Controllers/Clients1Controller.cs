@@ -14,7 +14,7 @@ namespace FinBack.Controllers
     public class Clients1Controller : ControllerBase, IDisposable
     {
         private readonly Context _context;
-
+        object locker = new object();
         public Clients1Controller(Context context)
         {
             _context = context;
@@ -67,7 +67,8 @@ namespace FinBack.Controllers
                 newbalance.Amount += am;
                 _context.Entry(newbalance).State = EntityState.Modified;
             }
-            _context.SaveChangesAsync();
+
+            _context.SaveChanges();
             var client = _context.Clients.Include(x => x.Balances).FirstOrDefault(y => y.Id == id);
             return client;
         }

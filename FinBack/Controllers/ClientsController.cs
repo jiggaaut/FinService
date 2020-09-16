@@ -13,8 +13,8 @@ namespace FinBack.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly Context _context;
-
+        public readonly Context _context;
+        object locker = new object();
         public ClientsController(Context context)
         {
             _context = context;
@@ -63,9 +63,12 @@ namespace FinBack.Controllers
         {
             if (ClientBalanceExists(id))
             {
-                Balance newbalance = await _context.Balances.FirstOrDefaultAsync(x => x.ClientId == id);
+                var newbalance = await _context.Balances.FirstOrDefaultAsync(x => x.ClientId == id);
                 newbalance.Amount += am;
-                _context.Entry(newbalance).State = EntityState.Modified;
+                //_context.Update(newbalance);
+                //_context.SaveChanges();
+
+                _context.Entry(newbalance).State = EntityState.Modified;                
             }
             await _context.SaveChangesAsync();
             var client = await _context.Clients.Include(x => x.Balances).FirstOrDefaultAsync(y => y.Id == id);
