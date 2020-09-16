@@ -29,7 +29,7 @@ namespace FinBack.Controllers
             return await _context.Clients.Include(x => x.Balances).ToListAsync();
         }
 
-        // GET: api/Clients/5/AddBalance?=500
+        // GET: api/Clients/5/
         //Информация о одном клиенте и его балансах
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
