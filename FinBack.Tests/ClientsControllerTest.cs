@@ -24,6 +24,7 @@ namespace FinBack.Tests
             using (var context = new Context(ContextOptions))
             {
                 context.Database.EnsureDeleted();
+
                 context.Database.EnsureCreated();
 
                 List<Client> L9 = new List<Client>();
@@ -80,10 +81,12 @@ namespace FinBack.Tests
                     var result = controller.GetClients().Result.Value;
                     int sum = 0;
                     string str = "";
+                    string ids = "";
                     foreach (Client c in result)
                     {
                         str += c.Balances.First().Amount + " ";
                         sum += c.Balances.First().Amount;
+                        ids += c.Balances.First().Id + " ";
                     }
                     Assert.Equal("100", Convert.ToString((string)sum.ToString())); //Строковая строка
                 }
@@ -97,8 +100,7 @@ namespace FinBack.Tests
             {
                 int a = random.Next(1, 50);
                 int val = 1; //random.Next(100, 1000);
-                //Thread.Sleep(random.Next(0, 400));
-                controller.AddBalance(a, val).Wait();                
+                controller.AddBalance(a, val).Wait(); // Не хочет дожидаться catch               
             }            
         }
     }

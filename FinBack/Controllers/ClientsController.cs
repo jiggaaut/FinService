@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FinBack.Models;
+using System.Linq.Expressions;
+using System.Threading;
 
 namespace FinBack.Controllers
 {
@@ -65,14 +67,52 @@ namespace FinBack.Controllers
             {
                 var newbalance = await _context.Balances.FirstOrDefaultAsync(x => x.ClientId == id);
                 newbalance.Amount += am;
-                //_context.Update(newbalance);
-                //_context.SaveChanges();
-
-                _context.Entry(newbalance).State = EntityState.Modified;                
+                _context.Entry(newbalance).State = EntityState.Modified;
             }
-            await _context.SaveChangesAsync();
-            var client = await _context.Clients.Include(x => x.Balances).FirstOrDefaultAsync(y => y.Id == id);
-            return client;
+            var saved = false;
+            while (!saved)
+            {
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    saved = true;
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    foreach (var entry in ex.Entries)
+                    {
+                        if (entry.Entity is Balance)
+                        {
+                            var proposedValues = entry.CurrentValues;
+                            var databaseValues = entry.GetDatabaseValues();
+
+                            foreach (var property in proposedValues.Properties)
+                            {
+                                var proposedValue = proposedValues[property];
+                                var databaseValue = databaseValues[property];
+                                // TODO: decide which value should be written to database
+                                if (property.Name is "Amount")
+                                {
+                                    int buffer = (int)databaseValues[property] + am;
+                                    proposedValues[property] = buffer;
+                                }
+                            }
+                            // Refresh original values to bypass next concurrency check
+                            entry.OriginalValues.SetValues(databaseValues);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException(
+                                "Don't know how to handle concurrency conflicts for "
+                                + entry.Metadata.Name);
+                        }
+                    }
+                    // TODO: обратботка которая не работает
+                }
+            }
+            return NoContent();
+            //var client = await _context.Clients.Include(x => x.Balances).FirstOrDefaultAsync(y => y.Id == id);
+            //return client;
         }
 
         private bool ClientExists(int id)
